@@ -8,7 +8,7 @@
 class Router {
 public:
     Router();
-    void run();
+    void run(std::string& outputName);
 private:
     int iter;
     
@@ -25,6 +25,6 @@ private:
 
     void ripup(const vector<int>& netsToRoute);
     void updateCost();
-
+    void printCSV(std::string& outputName);
     void printStat();
 };

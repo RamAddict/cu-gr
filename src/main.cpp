@@ -104,7 +104,7 @@ void runISPD18Flow(const boost::program_options::variables_map& vm) {
     log() << "finish reading benchmark" << std::endl;
 
     Router router;
-    router.run();
+    router.run(db::setting.outputFile);
 
     grDatabase.writeGuides(db::setting.outputFile);
 

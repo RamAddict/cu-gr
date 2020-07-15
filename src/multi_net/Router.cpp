@@ -2,6 +2,8 @@
 #include "flute/flute.h"
 #include "Scheduler.h"
 #include "single_net/InitRoute.h"
+#include <iostream>
+#include <fstream>
 
 extern "C" {
 void readLUT();
@@ -32,7 +34,7 @@ ostream& operator<<(ostream& os, const MTStat mtStat) {
     return os;
 }
 
-void Router::run() {
+void Router::run(std::string& outputName) {
     allNetStatus.resize(database.nets.size(), db::RouteStatus::FAIL_UNPROCESSED);
     for (iter = 0; iter < db::setting.rrrIterLimit; iter++) {
         log() << std::endl;
@@ -50,6 +52,7 @@ void Router::run() {
             }
             break;
         }
+        log() << "ordering: " << netsToRoute.size() << " nets" << std::endl; 
         sortNets(netsToRoute);  // Note: only effective when doing mazeroute sequentially
 
         updateCost();
@@ -57,11 +60,33 @@ void Router::run() {
 
         if (iter > 0) {
             ripup(netsToRoute);
+            log() << "Ripped up: " << netsToRoute.size() <<  " nets " << std::endl;
             congMap.init(cellWidth, cellHeight);
         }
 
         routeApprx(netsToRoute);
-
+        if (iter == 0)
+        {
+            vector<double> buckets = {
+        -1, 0, 0.3, 0.6, 0.8, 0.9, 1, 1.1, 1.3, 1.5, 2, 3};
+            vector<int> routedWireUsageGrid;
+            vector<DBU> routedWireUsageLength;
+            double wL = grDatabase.getAllWireUsage(buckets, routedWireUsageGrid, routedWireUsageLength);
+            wL /= double(database.getLayer(1).pitch);
+            log() << "VIA COUNT AFTER PATTERN ROUTE (RRR0) " <<  grDatabase.getTotViaNum() << std::endl;
+            log() << "WIRELENGTHS AFTER PATTERN ROUTE (RRR0) " << wL << std::endl;
+        }
+        else
+        {
+            vector<double> buckets = {
+        -1, 0, 0.3, 0.6, 0.8, 0.9, 1, 1.1, 1.3, 1.5, 2, 3};
+            vector<int> routedWireUsageGrid;
+            vector<DBU> routedWireUsageLength;
+            double wL = grDatabase.getAllWireUsage(buckets, routedWireUsageGrid, routedWireUsageLength);
+            wL /= double(database.getLayer(1).pitch);
+            log() << "VIA COUNT AFTER RRR" << iter << " " << grDatabase.getTotViaNum() << std::endl;
+            log() << "WIRELENGTHS COUNT AFTER RRR" << iter << " " << wL << std::endl;
+        }
         log() << std::endl;
         log() << "Finish RRR iteration " << iter << std::endl;
         log() << "MEM: cur=" << utils::mem_use::get_current() << "MB, peak=" << utils::mem_use::get_peak() << "MB"
@@ -83,6 +108,44 @@ void Router::run() {
           << std::endl;
 
     printStat();
+
+    // print csv
+    printCSV(outputName);
+
+}
+
+void Router::printCSV(std::string& outputName) {
+    std::ofstream csv(outputName.substr(0, outputName.size()-5) + "csv");
+
+
+    auto totHP = 0;
+    auto totWL = 0;
+    auto totViaUN = 0;
+    for (auto& net : grDatabase.nets) {
+        totHP+=net.boundingBox.hp();
+        totWL+=net.getWirelength();
+
+        auto totViaU = 0;
+
+        for (auto /*GrBoxOnLayer*/ box : net.viaRouteGuides) 
+            for (int x = box.x.low; x <= box.x.high; x++)
+                for (int y = box.y.low; y <= box.y.high; y++)
+                {
+                    auto usage = grDatabase.getViaUsage(box.layerIdx, x, y);
+                    if (usage > 0)
+                    {
+                        totViaU++;
+                        grDatabase.removeVia(box);
+                    }
+                }
+        totViaUN+=totViaU;
+
+        csv << net.getName() << "," << net.boundingBox.hp() << "," << net.numOfPins()
+        << "," << net.getWirelength()/double(database.getLayer(1).pitch) << "," << totViaU << std::endl;
+    }
+
+    // csv << totHP << "," << totWL/double(database.getLayer(1).pitch) << "," << totViaUN;
+
 }
 
 Router::Router() {
@@ -210,10 +273,45 @@ void Router::fluteAllAndRoute(const vector<int>& netsToRoute) {
     printlog("finish pattern route");
 }
 
+/* Method central to the work */
 void Router::sortNets(vector<int>& netsToRoute) {
+    /* Unordered: Uncomment the next line and comment the rest*/
+    // log() << "ORDERING NOTHING" << std::endl;
+    
+    /* ORIGINAL METHOD AscendingHP: Uncomment the next statement, comment the rest*/
     sort(netsToRoute.begin(), netsToRoute.end(), [&](int id1, int id2) {
         return grDatabase.nets[id1].boundingBox.hp() < grDatabase.nets[id2].boundingBox.hp();
     });
+
+    /* DescendingHP: Uncomment the next statement, comment the rest*/
+    // sort(netsToRoute.begin(), netsToRoute.end(), [&](int id1, int id2) {
+    //     return grDatabase.nets[id1].boundingBox.hp() > grDatabase.nets[id2].boundingBox.hp();
+    // });
+    
+    /* AscendingNPins: Uncomment the next statement, comment the rest*/
+    // sort(netsToRoute.begin(), netsToRoute.end(), [&](int id1, int id2) {
+    //    return grDatabase.nets[id1].numOfPins() < grDatabase.nets[id2].numOfPins();
+    // });
+    
+    /* DescendingNPins: Uncomment the next statement, comment the rest*/
+    // sort(netsToRoute.begin(), netsToRoute.end(), [&](int id1, int id2) {
+    //    return grDatabase.nets[id1].numOfPins() > grDatabase.nets[id2].numOfPins();
+    // });
+
+    /* AscendingNPinsHP: Uncomment the next statement, comment the rest*/
+    // sort(netsToRoute.begin(), netsToRoute.end(), [&](int id1, int id2) {
+    //    if (grDatabase.nets[id1].numOfPins())
+    //    return (grDatabase.nets[id1].boundingBox.hp() + grDatabase.nets[id1].numOfPins()) < 
+    //    (grDatabase.nets[id2].boundingBox.hp() + grDatabase.nets[id2].numOfPins());
+    // });
+
+    /* DescendingNPinsHP: Uncomment the next statement, comment the rest*/
+    // sort(netsToRoute.begin(), netsToRoute.end(), [&](int id1, int id2) {
+    //    if (grDatabase.nets[id1].numOfPins())
+    //    return (grDatabase.nets[id1].boundingBox.hp() + grDatabase.nets[id1].numOfPins()) > 
+    //    (grDatabase.nets[id2].boundingBox.hp() + grDatabase.nets[id2].numOfPins());
+    // });
+
 }
 
 vector<int> Router::getNetsToRoute() {
