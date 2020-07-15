@@ -1,3 +1,19 @@
+**********************
+
+## Code modified for the sforum reasearch paper.
+General process to replicate results:
+
+1. Create 7 binaries by compiling the code and changing between 7 different sorting methods in the [sortNets function](https://github.com/RamAddict/cu-gr/edit/SForum/src/multi_net/Router.cpp) at line 277.
+2. Run all of them **singlethreaded** and save the program output to a file.
+3. Use the data obtained:  <br />
+3.1 The csv can be read by using the included python [script](https://github.com/RamAddict/cu-gr/blob/SForum/script.py). This script produces graphs from the data.  <br />
+3.2 Information on the output is parsed by the following linux command: 
+      ```bash
+            command
+      ```
+      Then pasted somewhere else for graph creation.
+
+**********************
 CUGR
 ======================================
 CUGR is a VLSI global routing tool developed by the research team supervised by Prof. Evangeline F. Y. Young at The Chinese University of Hong Kong (CUHK).
