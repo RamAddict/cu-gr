@@ -48,10 +48,10 @@ public:
 
     friend class GrRouteGrid2D;
 
-private:
     // only pref-dir is modeled
     UsageMapT routedWireMap;  // model cross-cell routing
     UsageMapT routedViaMap;
+private:
     vector<vector<vector<std::pair<int, DBU>>>> fixedMetalMap;  // layer, x, y, (# blocked tracks, avg blocked length)
     vector<vector<vector<double>>> histWireUsageMap;
 
@@ -66,13 +66,13 @@ private:
 
     std::pair<double, double> printAllUsage() const;
     double printAllVio() const;
-
+public:
     double getAllWireUsage(const vector<double>& buckets,
                            vector<int>& wireUsageGrid,
                            vector<DBU>& wireUsageLength) const;
     void getAllInCellUsage(const vector<double>& buckets, vector<int>& viaUsage) const;
     double getTotViaNum() const;
-
+private:
     void markFixedMetals();
     void markFixed(int layerIdx, int gridline, int cp, int num_track, DBU avg_length);
 
@@ -84,11 +84,11 @@ private:
     double getFixedUsage(const GrEdge& edge) const;
     double getWireUsage(int layerIdx, int gridline, int cp) const;
     double getWireUsage(const GrEdge& edge) const;
-
+public:
     double getViaUsage(int layerIdx, int x, int y) const;
     double getViaUsage(const GrPoint& via) const;
     double getCellUsage(int layerIdx, int x, int y) const;
-
+private:
     double getWireCapacity(const GrEdge& edge) const;
     double getInCellArea(const GrPoint& point) const;
 
@@ -97,10 +97,10 @@ private:
     DBU getFixedLength(const GrEdge& edge) const;
     double getInCellViaNum(const GrPoint& point) const;
     // double getUnitViaArea(const GrPoint& point, int side) const;
-
+public:
     void removeWire(const GrBoxOnLayer& box);
     void removeVia(const GrBoxOnLayer& box);
-
+private:
     void useWire(const GrBoxOnLayer& box);
     void useWire(int layerIdx, int gridline, int cp, double usage = 1);
     void useVia(const GrBoxOnLayer& box);
