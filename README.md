@@ -1,7 +1,7 @@
 **********************
 
 ## Code modified for the sforum reasearch paper.
-General process:
+General process to replicate results:
 
 1. Create 7 binaries by compiling the code and changing between 7 different sorting methods in the [sortNets function](https://github.com/RamAddict/cu-gr/edit/SForum/src/multi_net/Router.cpp) at line 277.
 2. Run all of them **singlethreaded** and save the program output to a file.
