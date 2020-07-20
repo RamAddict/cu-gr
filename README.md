@@ -7,10 +7,11 @@ General process to replicate results:
 2. Run all of them **singlethreaded** and save the program output to a file. The [run_tests.sh](https://github.com/RamAddict/cu-gr/blob/SForum/run_all_tests.sh) is an example of a simple bash script that does that. 
 3. Use the data obtained:  <br />
 3.1 The csv can be read by using the included python [script](https://github.com/RamAddict/cu-gr/blob/SForum/script.py). This script produces graphs from the data.  <br />
-3.2 Information on the output is parsed by the following linux command: 
+3.2 Relevant information in the .txt files is parsed by the following linux command: 
       ```bash
-            command
+            grep "wirelength | \|# vias     \|short      |\|total score\|ordering:" <output>.txt
       ```
+      
       Then pasted somewhere else for graph creation.
 
 **********************
