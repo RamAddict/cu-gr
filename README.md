@@ -3,8 +3,8 @@
 ## Code modified for the sforum reasearch paper.
 General process to replicate results:
 
-1. Create 7 binaries by compiling the code and changing between 7 different sorting methods in the [sortNets function](https://github.com/RamAddict/cu-gr/edit/SForum/src/multi_net/Router.cpp) at line 277.
-2. Run all of them **singlethreaded** and save the program output to a file. The [run_tests.sh](https://github.com/RamAddict/cu-gr/blob/SForum/run_all_tests.sh) is an example of a simple bash script that does that. 
+1. Create 7 binaries by compiling the code and changing between 7 different sorting methods in the [sortNets function](https://github.com/RamAddict/cu-gr/edit/SForum/src/multi_net/Router.cpp) at line 277. Alternatively, you may also simply use the static binaries located in the [SForum_executables folder](https://github.com/RamAddict/cu-gr/tree/SForum/SForum_executables)
+2. Run all of them **singlethreaded** and save the program output to a file. The [run_tests.sh](https://github.com/RamAddict/cu-gr/blob/SForum/run_all_tests.sh) is an example of a simple bash script that does that. You can find the benchmark suite in the [ICCAD2019 official site](http://iccad-contest.org/2019/problems.html), look for it in problem C.
 3. Use the data obtained:  <br />
 3.1 The csv can be read by using the included python [script](https://github.com/RamAddict/cu-gr/blob/SForum/script.py). This script produces graphs from the data.  <br />
 3.2 Relevant information in the .txt files is parsed by the following linux command: 
